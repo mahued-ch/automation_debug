@@ -1,0 +1,14 @@
+pyautogui
+python-docx
+opencv-python
+pandas
+openpyxl
+pywin32
+psutil
+pywinauto
+pillow
+opencv-python
+opencv-python-headless
+uiautomation
+
+
