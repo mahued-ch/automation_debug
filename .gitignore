@@ -1,6 +1,28 @@
+# ─── Entorno virtual ────────────────────────
 venv/
-build/
+
+# ─── Cachés y temporales de Python ──────────
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+
+# ─── Archivos de entorno/editor ─────────────
+*.env
+*.vscode/
+*.idea/
+.DS_Store
+Thumbs.db
+
+# ─── Salidas generadas ──────────────────────
+build/
+output/
+*.bak
+*.tmp
+
+# ─── Archivos ZIP u otros compartidos ───────
+*.zip
+
 # Ignorar config del usuario
 config_user.json
