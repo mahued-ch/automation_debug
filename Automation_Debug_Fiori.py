@@ -152,6 +152,9 @@ if running_test == 0:
     if i <= 6:
       eventos_criticos = buscar_todas_ocurrencias(texto_critico, confidence=0.9)
 
+    if i == 6 and eventos_criticos:
+      eventos_criticos = [eventos_criticos[0]]  # Solo conservar la primera
+    
     offset_x = 118  # Ajusta la distancia al botón "Selección" (en X)
     offset_y = 7    # Ajusta si el botón está más arriba o abajo
 
@@ -160,15 +163,6 @@ if running_test == 0:
 
         hubo_click = hazclick_en_evento(eventos_criticos)
         
-        # for posicion in eventos_criticos:
-        #     # Calcular la posición de la casilla de selección
-        #     x_seleccion = posicion.left + offset_x
-        #     y_seleccion = posicion.top + offset_y
-          
-        #   # Hacer clic en la casilla
-        #     pyautogui.click(x_seleccion, y_seleccion)
-        #     time.sleep(1)  # Pequeña pausa entre clics
-        #     hubo_click = True
     else:
         print("No se encontraron eventos críticos.")
 
@@ -189,15 +183,6 @@ if running_test == 0:
 
         hubo_click = hazclick_en_evento(eventos_nocriticos)
 
-        # for posicion in eventos_nocriticos:
-        #     # Calcular la posición de la casilla de selección
-        #     x_seleccion = posicion.left + offset_x
-        #     y_seleccion = posicion.top + offset_y
-          
-        #   # Hacer clic en la casilla
-        #     pyautogui.click(x_seleccion, y_seleccion)
-        #     time.sleep(1)  # Pequeña pausa entre clics
-        #     hubo_click = True
     else:
       print("No se encontraron eventos no críticos.")
 
@@ -322,6 +307,9 @@ if running_test == 0:
     eventos_graves = None
     eventos_graves = buscar_todas_ocurrencias(texto_grave, confidence=0.9)
 
+    if i == 6 and eventos_graves:
+      eventos_graves = [eventos_graves[0]]  # Solo conservar la primera
+
     offset_x = 118  # Ajusta la distancia al botón "Selección" (en X)
     offset_y = 7    # Ajusta si el botón está más arriba o abajo
 
@@ -330,15 +318,6 @@ if running_test == 0:
 
         hubo_click = hazclick_en_evento(eventos_graves)
         
-        # for posicion in eventos_criticos:
-        #     # Calcular la posición de la casilla de selección
-        #     x_seleccion = posicion.left + offset_x
-        #     y_seleccion = posicion.top + offset_y
-          
-        #   # Hacer clic en la casilla
-        #     pyautogui.click(x_seleccion, y_seleccion)
-        #     time.sleep(1)  # Pequeña pausa entre clics
-        #     hubo_click = True
     else:
         print("No se encontraron eventos críticos.")
 

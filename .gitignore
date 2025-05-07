@@ -1,5 +1,6 @@
 venv/
+build/
 __pycache__/
 *.pyc
 # Ignorar config del usuario
-app/config_user.json
+config_user.json

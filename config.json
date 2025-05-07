@@ -5,14 +5,10 @@
         "system_fiori":"Fiori Producción"
       },
       "email": {
-      "recipient": "druiz@chedraui.com.mx",
+      "recipient": "mahued@chedraui.com.mx",
       "subject_s4p": "LOG DEBUG SAP S4P EVENTOS CRITICOS, GRAVES Y NO CRITICOS",
       "subject_fiori_1": "LOG DEBUG SAP FIORI EVENTOS CRITICOS & NO CRITICOS",
       "subject_fiori_2": "LOG DEBUG SAP FIORI EVENTOS GRAVES"
-    },
-    "paths": {
-      "output_dir": "C:/ruta/de/salida",
-      "log_file": "C:/ruta/logs/log_debug.txt"
     },
     "tipos":{
         "no_relevantes": ["BU0", "BU1", "EU3", "BUS", "AU2", "AUM"]

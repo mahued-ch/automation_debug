@@ -57,12 +57,12 @@ def obtener_ruta_config_usuario():
 
 ###--------------------------------------------------------------------------------
 def carga_config():
-    # Ruta al archivo de config general (compartido)
+    # Ruta del script actual
     ruta_script = os.path.dirname(__file__)
-    ruta_config_general = os.path.join(ruta_script, "config.json")
 
-    # Ruta al archivo de config personalizado por usuario
-    ruta_config_usuario = obtener_ruta_config_usuario()
+    # Archivos de configuración
+    ruta_config_general = os.path.join(ruta_script, "config.json")
+    ruta_config_usuario = os.path.join(ruta_script, "config_user.json")
 
     # Cargar config general
     with open(ruta_config_general, "r", encoding="utf-8") as file:
@@ -73,7 +73,7 @@ def carga_config():
     config.setdefault("fiori", {})
     config.setdefault("email", {})
 
-    # Si el archivo local existe, sobrescribir los valores
+    # Cargar config del usuario si existe
     if os.path.exists(ruta_config_usuario):
         with open(ruta_config_usuario, "r", encoding="utf-8") as file:
             config_local = json.load(file)
@@ -81,18 +81,16 @@ def carga_config():
             config["fiori"].update(config_local.get("fiori", {}))
             config["email"].update(config_local.get("email", {}))
     else:
-        # Primera vez: pedir datos
+        # Solicitar datos la primera vez
         print("⚙️  Primera configuración del usuario:")
         config["s4p"]["usuario"] = input("Usuario S4P: ")
-        config["fiori"]["usuario"] = input("Usuario Fiori: ")
-        config["email"]["sender"] = input("Correo electrónico: ")
-    # Solicitar contraseñas (no se guardan)
         config["s4p"]["password"] = getpass.getpass("Contraseña S4P: ")
+        config["fiori"]["usuario"] = input("Usuario Fiori: ")
         config["fiori"]["password"] = getpass.getpass("Contraseña Fiori: ")
+        config["email"]["sender"] = input("Correo electrónico Receptor: ")
 
-
-        # Guardar config sin contraseñas
-        config_a_guardar = {
+        # Guardar 
+        config_guardar = {
             "s4p": {
                 "usuario": config["s4p"]["usuario"],
                 "password": config["s4p"]["password"]
@@ -105,8 +103,9 @@ def carga_config():
                 "sender": config["email"]["sender"]
             }
         }
+
         with open(ruta_config_usuario, 'w', encoding='utf-8') as f:
-            json.dump(config_a_guardar, f, indent=4)
+            json.dump(config_guardar, f, indent=4)
 
     return config
 
