@@ -203,7 +203,7 @@ if running_test == 0:
     pyautogui.click(location)
     cambio_detectado = espera_cambio_pantalla(1, 10, (region1), captura_inicial)
     if not cambio_detectado:
-      print('automation_debug_sap - 9 - No se encontró ventana de SAP')
+      print('automation_debug_sap - 9.1 - No se encontró ventana de SAP')
 #    time.sleep(1)
 
   # Guardamos la pantalla.
@@ -225,54 +225,55 @@ if running_test == 0:
   pyautogui.keyUp('ctrl')  
   cambio_detectado = espera_cambio_pantalla(5, 12, (region1), captura_inicial)
   if not cambio_detectado:
-    print('automation_debug_sap - 9 - No se encontró ventana de SAP')
+    print('automation_debug_sap - 9.2 - No se encontró ventana de SAP')
 
   print("Esperando Grabar lista fichero...")
   location = busca_en_pantalla(grabar_lista_fichero, 5, 12) 
 
 #  ahora buscamos presionar el texto con tabuladores
+  print("Presionamos texto con tabuladores...")
   location = pyautogui.locateCenterOnScreen(texto_con_tabuladores, confidence=0.8)
   pyautogui.click(location)
   time.sleep(1)
 
   # hago click en boton ok
+  print("Presionamos botón ok...")
   location = busca_en_pantalla(boton_ok_intro, 1, 5) 
   if location != None:
     captura_inicial = captura_pantalla((region1))    
     pyautogui.click(location)
-    cambio_detectado = espera_cambio_pantalla(1, 10, (region1), captura_inicial)
+    cambio_detectado = espera_cambio_pantalla(2, 20, (region1), captura_inicial)
     if not cambio_detectado:
-      print('automation_debug_sap - 10 - No se encontró ventana de SAP')
-#    time.sleep(1)
+      print('automation_debug_sap - 10.1 - No se encontró ventana de SAP')
 
-  captura_inicial = captura_pantalla((region1))    
-  print("Esperando Grabar fichero...")
-  cambio_detectado = espera_cambio_pantalla(3, 60, (region1), captura_inicial)
-  if not cambio_detectado:
-    print('automation_debug_sap - 10 - No se encontró ventana de SAP')
+  # si ya está esperando el cambio de pantalla ya no sería necesario esperar grabar fichero...      
+#  captura_inicial = captura_pantalla((region1))    
+#  print("Esperando Grabar fichero...")
+#  cambio_detectado = espera_cambio_pantalla(3, 60, (region1), captura_inicial)
+#  if not cambio_detectado:
+#    print('automation_debug_sap - 10.2 - No se encontró ventana de SAP')
       
-#  location = busca_en_pantalla(grabar_fichero, 3, 60) 
-
-#  time.sleep(1)
+  print("Ingresamos nombre del archivo...")
   pyautogui.typewrite(f"{prefijo}_{fecha_amd}.xls")
 
-  # Presionar Ctrl-Shift-F9
+  # Presionar Shift-Tab
   pyautogui.keyDown('shift') 
   pyautogui.press('tab')      
   pyautogui.keyUp('shift')   
 
   # Y teclea la ruta del archivo de salida
+  print("Ingresamos ruta del archivo...")
   pyautogui.typewrite(ruta_output)
 
   # Esperando botón reemplazar
   print("Esperando Botón Reemplazar...")
-  location = busca_en_pantalla(boton_reemplazar, 1, 20) 
+  location = busca_en_pantalla(boton_reemplazar, 2, 20) 
   if location != None:
     pyautogui.click(location)
 
-  # Esperando botón reemplazar
+  # Esperando botón permitir
   print("Esperando Botón Permitir...")
-  location = busca_en_pantalla(boton_permitir, 1, 20) 
+  location = busca_en_pantalla(boton_permitir, 2, 20) 
   if location != None:
     pyautogui.click(location)
 
