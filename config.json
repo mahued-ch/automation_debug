@@ -5,7 +5,7 @@
         "system_fiori":"Fiori Producción"
       },
       "email": {
-      "recipient": "mahued@chedraui.com.mx",
+      "recipient": "ivillegas@chedraui.com.mx",
       "subject_s4p": "LOG DEBUG SAP S4P EVENTOS CRITICOS, GRAVES Y NO CRITICOS",
       "subject_fiori_1": "LOG DEBUG SAP FIORI EVENTOS CRITICOS & NO CRITICOS",
       "subject_fiori_2": "LOG DEBUG SAP FIORI EVENTOS GRAVES"
