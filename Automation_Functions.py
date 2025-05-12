@@ -18,7 +18,9 @@ import webbrowser
 import win32clipboard
 import io
 import ctypes
-from Automation_Variables import configuracion
+import glob
+from Automation_Variables import configuracion 
+import Automation_Variables
 
 ###--------------------------------------------------------------------------------
 def limpiar_pantalla():
@@ -299,7 +301,27 @@ def captura_pantalla(region):
     """
     region_porcentual = calcular_region_porcentual(*region)
     
-    return pyautogui.screenshot(region=region_porcentual)
+        # Captura pantalla
+    imagen = pyautogui.screenshot(region=region_porcentual)
+
+ # Buscar el siguiente número disponible
+    if Automation_Variables.running_test == 1:
+        # Fecha y hora actual
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")        
+        
+        patron = f"output/{timestamp}_{Automation_Variables.file_output}_*.png"
+        archivos_existentes = glob.glob(patron)
+        # Calcular el siguiente consecutivo
+        siguiente = len(archivos_existentes) + 1        
+        
+        # Nombre del archivo con relleno de ceros (ej. 001, 002)
+#        nombre_archivo = f"output/screenshot_{siguiente:03}.png"
+        nombre_archivo = f"output/{timestamp}_{Automation_Variables.file_output}_{siguiente:02}.png"
+            
+    # Guardar imagen
+        imagen.save(nombre_archivo)
+
+    return imagen
 
 ###--------------------------------------------------------------------------------
         

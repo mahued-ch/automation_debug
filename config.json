@@ -1,4 +1,7 @@
 {
+    "config": {
+        "testing": "0"
+      },
     "sap": {
         "gui_path": "C:\\Program Files (x86)\\SAP\\FrontEnd\\SAPgui\\saplogon.exe",
         "system_s4p": "S4P HANA Productivo",

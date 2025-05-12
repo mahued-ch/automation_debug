@@ -10,11 +10,12 @@ from Automation_Variables import ruta, ruta_output, boton_flecha_atras, boton_ok
 from Automation_Variables import ruta_imagenes, boton_auditoria1, boton_auditoria2, boton_reinicializar, log_debug, boton_seleccion_multiple, boton_arriba_abajo, boton_seleccionar_detalle
 from Automation_Variables import boton_leer_auditoria, texto_grave, texto_nocritico_AU5, texto_nocritico_AUK, texto_nocritico_BU4, texto_critico, texto_con_tabuladores, ventana_noresultados
 from Automation_Genera_Docto import Genera_Documento
-from Automation_Variables import borrar_archivos_carpeta_con_prefijo, limpiar_pantalla, running_test 
+from Automation_Variables import borrar_archivos_carpeta_con_prefijo, limpiar_pantalla
 from Automation_Variables import configuracion, carga_config
 from Automation_Functions import convert_to_excel, abrir_correo_outlook, captura_pantalla, espera_cambio_pantalla, copiar_imagen_al_clipboard
 from Automation_SAP import start_sap_logon, login_to_sap, close_window, close_sap_logon
 from Automation_Variables import region1, region3
+import Automation_Variables
 
 def pantallas_iguales(img1, img2):
     return ImageChops.difference(img1, img2).getbbox() is None
@@ -39,6 +40,8 @@ limpiar_pantalla()
 
 configuracion = carga_config()
 
+Automation_Variables.running_test = int(configuracion["config"]["testing"])
+
 start_sap_logon(configuracion)
 login_to_sap(configuracion["sap"]["system_s4p"], configuracion["s4p"]["usuario"], configuracion["s4p"]["password"])
 
@@ -60,7 +63,7 @@ prefijo = "s4p"
 
 contador = 1
 
-if running_test == 0:
+if Automation_Variables.running_test >= 0:
   # Borramos todos los archivos de la ruta de salida
   borrar_archivos_carpeta_con_prefijo(ruta_output, prefijo)
 
@@ -72,6 +75,8 @@ if running_test == 0:
   time.sleep(3)
 
   # Presionar Shift-F5
+  Automation_Variables.file_output = 'variante'
+  
   captura_inicial = captura_pantalla(region1)    
   
   print("Buscamos variante...")
@@ -118,6 +123,7 @@ if running_test == 0:
   # boton para mostrar selección
   location = busca_en_pantalla(boton_seleccion_multiple, 1, 10) 
   if location != None:
+    Automation_Variables.file_output = 'seleccion_multiple'
     captura_inicial = captura_pantalla((region1))    
     pyautogui.click(location)
     cambio_detectado = espera_cambio_pantalla(2, 10, (region1), captura_inicial)
@@ -157,6 +163,7 @@ if running_test == 0:
   # ejecuto la consulta
 #  time.sleep(1)
   pyautogui.press('f8')       # Presiona F8
+  Automation_Variables.file_output = 'ejecucion_consulta'
   captura_inicial = captura_pantalla((region1)) 
   copiar_imagen_al_clipboard(captura_inicial)
   time.sleep(3)
@@ -165,13 +172,9 @@ if running_test == 0:
     print('automation_debug_sap - 6 - Consulta de auditoría no se ejecutó')
     sys.exit()
 
-#  location = busca_en_pantalla(boton_auditoria1, 5, 120, 0.7) # esperamos hasta 10 minutos
-#  if location == None:
-#      print("No se encontró 'BOTON_AUDITORIA1', salimos del programa...")
-#      sys.exit()  
-
   print("Selección de columnas...")
   # Presionar Ctrl-F8
+  Automation_Variables.file_output = 'seleccion_columnas'
   captura_inicial = captura_pantalla((region1))    
   pyautogui.keyDown('ctrl')  # Mantiene presionada la tecla Control
   pyautogui.press('f8')       # Presiona F8
@@ -184,6 +187,7 @@ if running_test == 0:
 #  time.sleep(2)
 
   # Adiciona todas las columnas
+  Automation_Variables.file_output = 'adicionando_columnas'
   print("Adicionando columnas...")
   location = busca_en_pantalla(boton_flecha_atras, 1, 10) 
   location = (location[0], location[1] + 15)
@@ -199,6 +203,7 @@ if running_test == 0:
 # presionamos OK dentro de la ventana de modificar layout
   location = busca_en_pantalla(boton_ok_intro, 1, 10) 
   if location != None:
+    Automation_Variables.file_output = 'boton_ok'
     captura_inicial = captura_pantalla((region1))    
     pyautogui.click(location)
     cambio_detectado = espera_cambio_pantalla(1, 10, (region1), captura_inicial)
@@ -215,20 +220,65 @@ if running_test == 0:
   screenshot.save(os.path.join(ruta_output, f"{prefijo}_{fecha_amd}_{contador}.png"))    
 
   contador += 1
-      
-  # Presionar Ctrl-Shift-F9
-  captura_inicial = captura_pantalla((region1))    
-  pyautogui.keyDown('ctrl')  
-  pyautogui.keyDown('shift') 
-  pyautogui.press('f9')      
-  pyautogui.keyUp('shift')   
-  pyautogui.keyUp('ctrl')  
-  cambio_detectado = espera_cambio_pantalla(5, 12, (region1), captura_inicial)
-  if not cambio_detectado:
-    print('automation_debug_sap - 9.2 - No se encontró ventana de SAP')
 
-  print("Esperando Grabar lista fichero...")
-  location = busca_en_pantalla(grabar_lista_fichero, 5, 12) 
+#-------------------------------------      
+
+  max_intentos = 3
+  location = None
+
+  for intento in range(1, max_intentos + 1):
+      print(f"\n🔁 Intento {intento} de {max_intentos}")
+
+      # Captura inicial de pantalla en región 1
+      Automation_Variables.file_output = 'grabar_lista' ; 
+      captura_inicial = captura_pantalla(region1)    
+
+      print("Presiono Ctrl-Shift-F9 ...")
+      pyautogui.keyDown('ctrl')  
+      pyautogui.keyDown('shift') 
+      pyautogui.press('f9')      
+      pyautogui.keyUp('shift')   
+      pyautogui.keyUp('ctrl')  
+
+      print("Esperando Grabar lista fichero...")
+      cambio_detectado = espera_cambio_pantalla(2, 20, region1, captura_inicial)
+
+      if not cambio_detectado:
+          print('❌ automation_debug_sap - 9.2 - No se encontró cambio de pantalla')
+          continue  # Reintenta si no hubo cambio
+
+      # Buscar en pantalla
+      location = busca_en_pantalla(grabar_lista_fichero, 5, 12)
+
+      if location is not None:
+          print("✅ Ubicación encontrada.")
+          break  # Éxito, salimos del bucle
+      else:
+          print("⚠️ No se encontró la ubicación. Reintentando...")
+
+  if location is None:
+      print("❌ Error: No se pudo encontrar la ubicación después de 3 intentos.")
+      sys.exit()
+
+#-------------------------------------      
+#-------------------------------------      
+  # Presionar Ctrl-Shift-F9
+#  Automation_Variables.file_output = 'boton_ok'
+#  captura_inicial = captura_pantalla((region1))    
+#  pyautogui.keyDown('ctrl')  
+#  pyautogui.keyDown('shift') 
+#  pyautogui.press('f9')      
+#  pyautogui.keyUp('shift')   
+#  pyautogui.keyUp('ctrl')  
+#  cambio_detectado = espera_cambio_pantalla(5, 12, (region1), captura_inicial)
+#  if not cambio_detectado:
+#    print('automation_debug_sap - 9.2 - No se encontró ventana de SAP')
+
+#  print("Esperando Grabar lista fichero...")
+#  location = busca_en_pantalla(grabar_lista_fichero, 5, 12) 
+#-------------------------------------      
+#-------------------------------------      
+#-------------------------------------      
 
 #  ahora buscamos presionar el texto con tabuladores
   print("Presionamos texto con tabuladores...")
@@ -238,6 +288,7 @@ if running_test == 0:
 
   # hago click en boton ok
   print("Presionamos botón ok...")
+  Automation_Variables.file_output = 'boton_ok'
   location = busca_en_pantalla(boton_ok_intro, 1, 5) 
   if location != None:
     captura_inicial = captura_pantalla((region1))    
@@ -246,7 +297,7 @@ if running_test == 0:
     if not cambio_detectado:
       print('automation_debug_sap - 10.1 - No se encontró ventana de SAP')
 
-  # si ya está esperando el cambio de pantalla ya no sería necesario esperar grabar fichero...      
+# si ya está esperando el cambio de pantalla ya no sería necesario esperar grabar fichero...      
 #  captura_inicial = captura_pantalla((region1))    
 #  print("Esperando Grabar fichero...")
 #  cambio_detectado = espera_cambio_pantalla(3, 60, (region1), captura_inicial)
@@ -256,10 +307,19 @@ if running_test == 0:
   print("Ingresamos nombre del archivo...")
   pyautogui.typewrite(f"{prefijo}_{fecha_amd}.xls")
 
+  time.sleep(2)
   # Presionar Shift-Tab
   pyautogui.keyDown('shift') 
   pyautogui.press('tab')      
   pyautogui.keyUp('shift')   
+
+  # Presionar Ctrl-A
+  pyautogui.keyDown('ctrl') 
+  pyautogui.press('a')      
+  pyautogui.keyUp('ctrl')   
+
+  # Presionar Delete
+  pyautogui.keyDown('delete') 
 
   # Y teclea la ruta del archivo de salida
   print("Ingresamos ruta del archivo...")

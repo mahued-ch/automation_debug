@@ -12,10 +12,11 @@ from Automation_Variables import ruta, ruta_output, boton_flecha_atras, boton_ok
 from Automation_Variables import boton_cancel, boton_auditoria1, boton_auditoria2, boton_reinicializar, log_debug, boton_seleccion_multiple, boton_arriba_abajo, boton_seleccionar_detalle
 from Automation_Variables import boton_leer_auditoria, texto_grave, texto_nocritico_AU5, texto_nocritico_AUK, texto_nocritico_BU4, texto_critico, texto_con_tabuladores, ventana_noresultados
 from Automation_Genera_Docto import Genera_Documento
-from Automation_Variables import borrar_archivos_carpeta_con_prefijo, limpiar_pantalla, running_test 
+from Automation_Variables import borrar_archivos_carpeta_con_prefijo, limpiar_pantalla
 from Automation_Variables import configuracion, carga_config, region4
 from Automation_Functions import convert_to_excel_fiori, abrir_correo_outlook, espera_cambio_pantalla, captura_pantalla
 from Automation_SAP import start_sap_logon, login_to_sap, close_window, close_sap_logon
+import Automation_Variables
 
 ###--------------------------------------------------------------------------------
 def busca_en_pantalla(imagen, intervalo, reintentos, confidence=0.8): 
@@ -76,6 +77,8 @@ limpiar_pantalla()
 
 configuracion = carga_config()
 
+Automation_Variables.running_test = int(configuracion["config"]["testing"]) 
+
 start_sap_logon(configuracion)
 login_to_sap(configuracion["sap"]["system_fiori"], configuracion["fiori"]["usuario"], configuracion["fiori"]["password"])
 
@@ -83,7 +86,7 @@ prefijo = "Fiori_criticos"
 contador = 1
 
 # Borramos todos los archivos de la ruta de salida
-if running_test == 0:
+if Automation_Variables.running_test >= 0 :
   borrar_archivos_carpeta_con_prefijo(ruta_output, prefijo)
 
   # buscamos último archivo de captura generado
@@ -92,6 +95,8 @@ if running_test == 0:
 
   # Esperar 3 segundos para permitirte enfocar el formulario
 #  time.sleep(3)
+
+  Automation_Variables.file_output = 'dentro_de_sm20n'
 
   # Presionar Shift-F5
   print("Proporcionando fechas...")
@@ -278,7 +283,7 @@ except Exception as e:
 prefijo = "Fiori_graves"
 
 # Borramos todos los archivos de la ruta de salida
-if running_test == 0:
+if Automation_Variables.running_test >= 0:
   borrar_archivos_carpeta_con_prefijo(ruta_output, prefijo)
 
   contador = 1
@@ -296,6 +301,8 @@ if running_test == 0:
   location = busca_en_pantalla(boton_seleccionar_detalle, 1, 10) 
   if location != None:
     pyautogui.click(location)
+
+  Automation_Variables.file_output = 'seleccion_graves'
 
   for i in range(7):
     print(f"Mostramos la página {i}.")

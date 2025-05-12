@@ -43,7 +43,8 @@ region2 = (0.30, 0.30, 0.50, 0.50)
 region3 = (0.30, 0.15, 0.45, 0.75) 
 region4 = (0.18, 0.43, 0.57, 0.72) 
 
-running_test = 0 # 1 = si, 0 = no
+running_test = 1 # 1 = si, 0 = no
+file_output = 'Nombre'
 
 ###--------------------------------------------------------------------------------
 def obtener_ruta_config_usuario():
@@ -87,7 +88,7 @@ def carga_config():
         config["s4p"]["password"] = getpass.getpass("Contraseña S4P: ")
         config["fiori"]["usuario"] = input("Usuario Fiori: ")
         config["fiori"]["password"] = getpass.getpass("Contraseña Fiori: ")
-        config["email"]["sender"] = input("Correo electrónico Receptor: ")
+        config["email"]["sender"] = input("Tu Correo electrónico: ")
 
         # Guardar 
         config_guardar = {
