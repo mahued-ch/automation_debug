@@ -28,7 +28,7 @@ def get_reporte(lcprefijo, lcfecha_amd):
   # Adiciona todas las columnas
   print("Adicionando columnas...")
   Automation_Variables.file_output = 'adicionando_columnas' ; 
-  location = busca_en_pantalla(boton_flecha_atras, 2, 10) 
+  location = busca_en_pantalla([boton_flecha_atras], 2, 10) 
   location = (location[0], location[1] + 15)
   for i in range(8):
       captura_inicial = captura_pantalla((region3))    
@@ -40,7 +40,7 @@ def get_reporte(lcprefijo, lcfecha_amd):
 
   Automation_Variables.file_output = 'boton_ok' ; 
   captura_inicial = captura_pantalla((region1))    
-  location = busca_en_pantalla(boton_ok_intro, 1, 10) 
+  location = busca_en_pantalla([boton_ok_intro], 1, 10) 
   if location != None:
     pyautogui.click(location)
     cambio_detectado = espera_cambio_pantalla(1, 10, (region1), captura_inicial)
@@ -74,7 +74,7 @@ def get_reporte(lcprefijo, lcfecha_amd):
           continue  # Reintenta si no hubo cambio
 
       # Buscar en pantalla
-      location = busca_en_pantalla(grabar_lista_fichero, 5, 12)
+      location = busca_en_pantalla([grabar_lista_fichero], 5, 12)
 
       if location is not None:
           print("✅ Ubicación encontrada.")
@@ -92,14 +92,14 @@ def get_reporte(lcprefijo, lcfecha_amd):
   time.sleep(1)
 
   # hago click en boton ok
-  location = busca_en_pantalla(boton_ok_intro, 1, 5) 
+  location = busca_en_pantalla([boton_ok_intro], 1, 5) 
   if location != None:
     pyautogui.click(location)
     time.sleep(1)
 
   print("Esperando Grabar fichero...")
 
-  location = busca_en_pantalla(grabar_fichero, 3, 60) 
+  location = busca_en_pantalla([grabar_fichero], 3, 60) 
 
   time.sleep(1)
   pyautogui.typewrite(f"{lcprefijo}_{lcfecha_amd}.xls")
@@ -123,7 +123,7 @@ def get_reporte(lcprefijo, lcfecha_amd):
 
   # Esperando botón reemplazar
   print("Esperando Botón Reemplazar...")
-  location = busca_en_pantalla(boton_reemplazar, 1, 20) 
+  location = busca_en_pantalla([boton_reemplazar], 1, 20) 
   if location != None:
     pyautogui.click(location)
 
@@ -131,7 +131,7 @@ def get_reporte(lcprefijo, lcfecha_amd):
   print("Esperando Botón Permitir...")
   Automation_Variables.file_output = 'boton_permitir' ; 
   captura_inicial = captura_pantalla((region1))    
-  location = busca_en_pantalla(boton_permitir, 1, 20) 
+  location = busca_en_pantalla([boton_permitir], 1, 20) 
   if location != None:
     pyautogui.click(location)
     cambio_detectado = espera_cambio_pantalla(1, 10, (region1), captura_inicial)

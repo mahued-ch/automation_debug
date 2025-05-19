@@ -12,7 +12,7 @@ from Automation_Variables import boton_leer_auditoria, texto_grave, texto_nocrit
 from Automation_Genera_Docto import Genera_Documento
 from Automation_Variables import borrar_archivos_carpeta_con_prefijo, limpiar_pantalla
 from Automation_Variables import configuracion, carga_config
-from Automation_Functions import convert_to_excel, abrir_correo_outlook, captura_pantalla, espera_cambio_pantalla, copiar_imagen_al_clipboard
+from Automation_Functions import convert_to_excel, abrir_correo_outlook, captura_pantalla, espera_cambio_pantalla, copiar_imagen_al_clipboard, busca_en_pantalla
 from Automation_SAP import start_sap_logon, login_to_sap, close_window, close_sap_logon
 from Automation_Variables import region1, region3
 import Automation_Variables
@@ -20,21 +20,21 @@ import Automation_Variables
 def pantallas_iguales(img1, img2):
     return ImageChops.difference(img1, img2).getbbox() is None
   
-def busca_en_pantalla(imagen, intervalo, reintentos, confidence=0.8): 
-    location = None
-    conta = 0
-    while (location == None) and (conta <= reintentos):
-        try:
-            conta += 1 
-            time.sleep(intervalo)
-            location = pyautogui.locateCenterOnScreen(imagen, confidence=confidence)
-        except pyautogui.ImageNotFoundException:
-            print(f"Imagen no encontrada en intento {conta}.")
-            continue
-        except Exception as e:
-            print(f"Error inesperado: {e}")
-            break
-    return location
+# def busca_en_pantalla(imagen, intervalo, reintentos, confidence=0.8): 
+#     location = None
+#     conta = 0
+#     while (location == None) and (conta <= reintentos):
+#         try:
+#             conta += 1 
+#             time.sleep(intervalo)
+#             location = pyautogui.locateCenterOnScreen(imagen, confidence=confidence)
+#         except pyautogui.ImageNotFoundException:
+#             print(f"Imagen no encontrada en intento {conta}.")
+#             continue
+#         except Exception as e:
+#             print(f"Error inesperado: {e}")
+#             break
+#     return location
 
 limpiar_pantalla()
 
@@ -91,7 +91,7 @@ if Automation_Variables.running_test >= 0:
   # selecciona la variante
   print("Seleccionamos variante...")
   time.sleep(1)
-  location = busca_en_pantalla(log_debug, 1, 10, 0.7) 
+  location = busca_en_pantalla([log_debug], 1, 10, 0.7) 
   if location != None:
     captura_inicial = captura_pantalla((region1))    
     pyautogui.doubleClick(location)
@@ -121,7 +121,7 @@ if Automation_Variables.running_test >= 0:
 
   print("Botón selección múltiple...")
   # boton para mostrar selección
-  location = busca_en_pantalla(boton_seleccion_multiple, 1, 10) 
+  location = busca_en_pantalla([boton_seleccion_multiple], 1, 10) 
   if location != None:
     Automation_Variables.file_output = 'seleccion_multiple'
     captura_inicial = captura_pantalla((region1))    
@@ -132,7 +132,7 @@ if Automation_Variables.running_test >= 0:
       sys.exit()
 
   # tomo captura de cada una de las pantallas de valores seleccionados
-#  location = busca_en_pantalla(boton_arriba_abajo, 1, 10) 
+#  location = busca_en_pantalla([boton_arriba_abajo], 1, 10) 
 #  location = (location[0], location[1] - 25)
 
   print("Capturamos pantallas...")
@@ -189,7 +189,7 @@ if Automation_Variables.running_test >= 0:
   # Adiciona todas las columnas
   Automation_Variables.file_output = 'adicionando_columnas'
   print("Adicionando columnas...")
-  location = busca_en_pantalla(boton_flecha_atras, 1, 10) 
+  location = busca_en_pantalla([boton_flecha_atras], 1, 10) 
   location = (location[0], location[1] + 15)
   for i in range(10):
 #      captura_inicial = captura_pantalla((6, 170, 850, 830))    
@@ -201,7 +201,7 @@ if Automation_Variables.running_test >= 0:
 #      time.sleep(1)
 
 # presionamos OK dentro de la ventana de modificar layout
-  location = busca_en_pantalla(boton_ok_intro, 1, 10) 
+  location = busca_en_pantalla([boton_ok_intro], 1, 10) 
   if location != None:
     Automation_Variables.file_output = 'boton_ok'
     captura_inicial = captura_pantalla((region1))    
@@ -248,7 +248,7 @@ if Automation_Variables.running_test >= 0:
           continue  # Reintenta si no hubo cambio
 
       # Buscar en pantalla
-      location = busca_en_pantalla(grabar_lista_fichero, 5, 12)
+      location = busca_en_pantalla([grabar_lista_fichero], 5, 12)
 
       if location is not None:
           print("✅ Ubicación encontrada.")
@@ -275,7 +275,7 @@ if Automation_Variables.running_test >= 0:
 #    print('automation_debug_sap - 9.2 - No se encontró ventana de SAP')
 
 #  print("Esperando Grabar lista fichero...")
-#  location = busca_en_pantalla(grabar_lista_fichero, 5, 12) 
+#  location = busca_en_pantalla([grabar_lista_fichero], 5, 12) 
 #-------------------------------------      
 #-------------------------------------      
 #-------------------------------------      
@@ -289,7 +289,7 @@ if Automation_Variables.running_test >= 0:
   # hago click en boton ok
   print("Presionamos botón ok...")
   Automation_Variables.file_output = 'boton_ok'
-  location = busca_en_pantalla(boton_ok_intro, 1, 5) 
+  location = busca_en_pantalla([boton_ok_intro], 1, 5) 
   if location != None:
     captura_inicial = captura_pantalla((region1))    
     pyautogui.click(location)
@@ -327,13 +327,13 @@ if Automation_Variables.running_test >= 0:
 
   # Esperando botón reemplazar
   print("Esperando Botón Reemplazar...")
-  location = busca_en_pantalla(boton_reemplazar, 2, 20) 
+  location = busca_en_pantalla([boton_reemplazar], 2, 20) 
   if location != None:
     pyautogui.click(location)
 
   # Esperando botón permitir
   print("Esperando Botón Permitir...")
-  location = busca_en_pantalla(boton_permitir, 2, 20) 
+  location = busca_en_pantalla([boton_permitir], 2, 20) 
   if location != None:
     pyautogui.click(location)
 
