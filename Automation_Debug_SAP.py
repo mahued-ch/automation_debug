@@ -159,10 +159,18 @@ if Automation_Variables.running_test >= 0:
     print('automation_debug_sap - 5 - No se encontró ventana de SAP')
     sys.exit()
 
-  print("Ejecuta consulta...")
-  # ejecuto la consulta
-#  time.sleep(1)
-  pyautogui.press('f8')       # Presiona F8
+  # Presionamos leer auditoria
+  # hacemos el intento de ejecutar el botón durante 5 segundos seguidos, para que no se pierda
+  # o si la pantalla cambia antes de terminar esos 5 segundos se sale
+  print("Presionamos botón leer auditoria...")
+  captura_inicial = captura_pantalla((region1))    
+  for _ in range(5):
+      pyautogui.press('F8')       # Presiona F8
+      cambio_detectado = espera_cambio_pantalla(1, 1, (region1), captura_inicial)
+      if cambio_detectado == True:
+        break
+      time.sleep(1)  # Espera 1 segundo entre cada pulsación      
+  
   Automation_Variables.file_output = 'ejecucion_consulta'
   captura_inicial = captura_pantalla((region1)) 
   copiar_imagen_al_clipboard(captura_inicial)

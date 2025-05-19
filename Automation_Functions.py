@@ -19,6 +19,7 @@ import win32clipboard
 import io
 import ctypes
 import glob
+import numpy as np
 from Automation_Variables import configuracion 
 import Automation_Variables
 
@@ -29,45 +30,15 @@ def limpiar_pantalla():
     else:
         os.system('clear')   
 
-###--------------------------------------------------------------------------------
-# def busca_en_pantalla(imagen, intervalo, reintentos): 
-#     location = None
-#     conta = 0
-#     while (location == None) and (conta <= reintentos):
-#         try:
-#             conta += 1 
-#             time.sleep(intervalo)
-#             location = pyautogui.locateCenterOnScreen(imagen, confidence=0.8)
-#         except Exception:
-#             pass
-#     return location
-
-###--------------------------------------------------------------------------------
-# def busca_en_pantalla(imagen, intervalo, reintentos, confidence=0.8): 
-#     location = None
-#     conta = 0
-#     while (location == None) and (conta <= reintentos):
-#         try:
-#             conta += 1 
-#             time.sleep(intervalo)
-#             location = pyautogui.locateCenterOnScreen(imagen, confidence=confidence)
-#         except pyautogui.ImageNotFoundException:
-#             print(f"Imagen no encontrada en intento {conta}.")
-#             continue
-#         except Exception as e:
-#             print(f"Error inesperado: {e}")
-#             break
-#     return location
-
-
-###--------------------------------------------------------------------------------
-# def busca_en_pantalla(imagenes, intervalo, reintentos,  confidence=0.8):
+# def busca_en_pantalla(imagenes, intervalo, reintentos, confidence=0.8):
 #     """
 #     Busca en pantalla cualquiera de las imágenes dadas, con intentos y pausas.
+#     Si no encuentra nada, guarda captura de pantalla en carpeta 'logs' y registra log.
 
-#     :param imagenes: Lista de rutas de imagen a buscar.
-#     :param intervalo: Tiempo (segundos) entre cada reintento.
+#     :param imagenes: Lista de rutas de imágenes a buscar.
+#     :param intervalo: Tiempo en segundos entre reintentos.
 #     :param reintentos: Número máximo de reintentos.
+#     :param confidence: Nivel de confianza para el reconocimiento de imagen (0.0 a 1.0).
 #     :return: Coordenadas (x, y) si encuentra alguna imagen, o None.
 #     """
 #     location = None
@@ -78,58 +49,82 @@ def limpiar_pantalla():
 #             try:
 #                 location = pyautogui.locateCenterOnScreen(imagen, confidence=confidence)
 #                 if location:
-#                     break  # ¡Encontrado!
+#                     break
 #             except Exception:
-#                 print(f"Imagen no encontrada en intento {intentos}.")
-#                 pass  # Ignora errores individuales y sigue
-
+#                 pass
 #         if location is None:
 #             intentos += 1
 #             time.sleep(intervalo)
+
+#     if location is None:
+#         # Crear carpeta 'logs' si no existe
+#         ruta_logs = os.path.join(os.path.dirname(__file__), "logs")
+#         os.makedirs(ruta_logs, exist_ok=True)
+
+#         # Nombre de archivo con nombres de imágenes y timestamp
+#         nombres = "_".join([os.path.splitext(os.path.basename(img))[0] for img in imagenes])
+#         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+#         captura_path = os.path.join(ruta_logs, f"{nombres}_{timestamp}.png")
+#         log_path = os.path.join(ruta_logs, "busqueda.log")
+
+#         # Guardar captura de pantalla
+#         pyautogui.screenshot(captura_path)
+
+#         # Escribir en log
+#         with open(log_path, "a", encoding="utf-8") as f:
+#             f.write(f"[{timestamp}] No se encontró ninguna de las imágenes: {imagenes}\n")
+#             f.write(f"  Captura guardada en: {captura_path}\n\n")
 
 #     return location
 
 def busca_en_pantalla(imagenes, intervalo, reintentos, confidence=0.8):
     """
-    Busca en pantalla cualquiera de las imágenes dadas, con intentos y pausas.
-    Si no encuentra nada, guarda captura de pantalla en carpeta 'logs' y registra log.
+    Busca una lista de imágenes en la pantalla usando OpenCV.
+    Guarda captura en 'logs/' si ninguna imagen es encontrada.
 
-    :param imagenes: Lista de rutas de imágenes a buscar.
-    :param intervalo: Tiempo en segundos entre reintentos.
-    :param reintentos: Número máximo de reintentos.
-    :param confidence: Nivel de confianza para el reconocimiento de imagen (0.0 a 1.0).
+    :param imagenes: Lista de rutas a imágenes.
+    :param intervalo: Tiempo entre reintentos (segundos).
+    :param reintentos: Número máximo de intentos.
+    :param confidence: Nivel mínimo de coincidencia (0.0 a 1.0).
     :return: Coordenadas (x, y) si encuentra alguna imagen, o None.
     """
     location = None
     intentos = 0
 
     while location is None and intentos < reintentos:
-        for imagen in imagenes:
-            try:
-                location = pyautogui.locateCenterOnScreen(imagen, confidence=confidence)
-                if location:
-                    break
-            except Exception:
-                pass
+        screenshot = pyautogui.screenshot()
+        screen_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2GRAY)
+
+        for imagen_path in imagenes:
+            template = cv2.imread(imagen_path, cv2.IMREAD_GRAYSCALE)
+            if template is None:
+                print(f"⚠️ No se pudo cargar la imagen: {imagen_path}")
+                continue
+
+            result = cv2.matchTemplate(screen_np, template, cv2.TM_CCOEFF_NORMED)
+            _, max_val, _, max_loc = cv2.minMaxLoc(result)
+
+            if max_val >= confidence:
+                # Coordenadas centradas del template
+                h, w = template.shape
+                location = (max_loc[0] + w // 2, max_loc[1] + h // 2)
+                break  # sale del for de imágenes
+
         if location is None:
             intentos += 1
             time.sleep(intervalo)
 
     if location is None:
-        # Crear carpeta 'logs' si no existe
         ruta_logs = os.path.join(os.path.dirname(__file__), "logs")
         os.makedirs(ruta_logs, exist_ok=True)
 
-        # Nombre de archivo con nombres de imágenes y timestamp
         nombres = "_".join([os.path.splitext(os.path.basename(img))[0] for img in imagenes])
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         captura_path = os.path.join(ruta_logs, f"{nombres}_{timestamp}.png")
-        log_path = os.path.join(ruta_logs, "busqueda.log")
+        log_path = os.path.join(ruta_logs, "busqueda_opencv.log")
 
-        # Guardar captura de pantalla
+        # Guardar captura y log
         pyautogui.screenshot(captura_path)
-
-        # Escribir en log
         with open(log_path, "a", encoding="utf-8") as f:
             f.write(f"[{timestamp}] No se encontró ninguna de las imágenes: {imagenes}\n")
             f.write(f"  Captura guardada en: {captura_path}\n\n")

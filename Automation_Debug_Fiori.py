@@ -13,7 +13,7 @@ from Automation_Variables import boton_cancel, boton_auditoria1, boton_auditoria
 from Automation_Variables import boton_leer_auditoria, texto_grave, texto_nocritico_AU5, texto_nocritico_AUK, texto_nocritico_BU4, texto_critico, texto_con_tabuladores, ventana_noresultados
 from Automation_Genera_Docto import Genera_Documento
 from Automation_Variables import borrar_archivos_carpeta_con_prefijo, limpiar_pantalla
-from Automation_Variables import configuracion, carga_config, region4
+from Automation_Variables import configuracion, carga_config, region4, region1
 from Automation_Functions import convert_to_excel_fiori, abrir_correo_outlook, espera_cambio_pantalla, captura_pantalla, busca_en_pantalla
 from Automation_SAP import start_sap_logon, login_to_sap, close_window, close_sap_logon
 import Automation_Variables
@@ -216,8 +216,18 @@ if Automation_Variables.running_test >= 0 :
     contador += 1
 
   # Presionamos leer auditoria
+  # hacemos el intento de ejecutar el botón durante 5 segundos seguidos, para que no se pierda
+  # o si la pantalla cambia antes de terminar esos 5 segundos se sale
   print("Presionamos botón leer auditoria...")
-  pyautogui.press('F8')       # Presiona F8
+  captura_inicial = captura_pantalla((region1))    
+  for _ in range(5):
+      pyautogui.press('F8')       # Presiona F8
+      cambio_detectado = espera_cambio_pantalla(1, 1, (region1), captura_inicial)
+      if cambio_detectado == True:
+        break
+      time.sleep(1)  # Espera 1 segundo entre cada pulsación    
+
+    
 #  location = busca_en_pantalla([boton_leer_auditoria], 1, 5) 
 #  if location != None:
 #    pyautogui.click(location)

@@ -19,6 +19,7 @@ Thumbs.db
 build/
 dist/
 output/
+logs/
 *.bak
 *.tmp
 
