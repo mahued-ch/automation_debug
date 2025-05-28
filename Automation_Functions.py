@@ -132,6 +132,24 @@ def busca_en_pantalla(imagenes, intervalo, reintentos, confidence=0.8):
     return location
 
 ###--------------------------------------------------------------------------------
+def buscar_centro_en_pantalla(lista_imagenes, confidence=0.8):
+    """
+    Busca el centro de la primera coincidencia encontrada entre varias imágenes.
+
+    :param lista_imagenes: Lista de rutas de imágenes a buscar.
+    :param confidence: Nivel de confianza para la búsqueda.
+    :return: Coordenadas (x, y) del centro de la imagen encontrada, o None si no encuentra.
+    """
+    for imagen in lista_imagenes:
+        try:
+            location = pyautogui.locateCenterOnScreen(imagen, confidence=confidence)
+            if location:
+                return location
+        except Exception:
+            pass
+    return None
+
+###--------------------------------------------------------------------------------
 def buscar_todas_ocurrencias(imagen, confidence=0.8):
 #    Busca todas las posiciones de una imagen en la pantalla.
     posiciones = None

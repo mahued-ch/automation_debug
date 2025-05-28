@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from pywinauto import Application
 from Fiori_Reporte import get_reporte
 from Automation_Variables import ruta, ruta_output, boton_flecha_atras, boton_ok_intro, grabar_lista_fichero, texto_con_tabuladores, grabar_fichero, boton_reemplazar, boton_permitir 
-from Automation_Variables import boton_cancel, boton_auditoria1, boton_auditoria2, boton_reinicializar, log_debug, boton_seleccion_multiple, boton_arriba_abajo, boton_seleccionar_detalle
+from Automation_Variables import boton_cancel, boton_auditoria, boton_reinicializar, log_debug, boton_seleccion_multiple, boton_arriba_abajo, boton_seleccionar_detalle
 from Automation_Variables import boton_leer_auditoria, texto_grave, texto_nocritico_AU5, texto_nocritico_AUK, texto_nocritico_BU4, texto_critico, texto_con_tabuladores, ventana_noresultados
 from Automation_Genera_Docto import Genera_Documento
 from Automation_Variables import borrar_archivos_carpeta_con_prefijo, limpiar_pantalla
@@ -36,15 +36,34 @@ import Automation_Variables
 #     return location
 
 ###--------------------------------------------------------------------------------
-def buscar_todas_ocurrencias(imagen, confidence=0.8):
-#    Busca todas las posiciones de una imagen en la pantalla.
-    posiciones = None
-    while (posiciones == None) :
+# def buscar_todas_ocurrencias(imagen, confidence=0.8):
+# #    Busca todas las posiciones de una imagen en la pantalla.
+#     posiciones = None
+#     while (posiciones == None) :
+#         try:
+#             posiciones = list(pyautogui.locateAllOnScreen(imagen, confidence=confidence))
+#         except Exception:
+#             pass
+#             break
+#     return posiciones
+
+###--------------------------------------------------------------------------------
+def buscar_todas_ocurrencias(lista_imagenes, confidence=0.8):
+    """
+    Busca todas las posiciones de una o varias imágenes en la pantalla.
+
+    :param lista_imagenes: Lista de rutas de imágenes a buscar.
+    :param confidence: Nivel de confianza para la búsqueda.
+    :return: Lista de posiciones encontradas [(x, y, ancho, alto), ...].
+    """
+    posiciones = []
+    for imagen in lista_imagenes:
         try:
-            posiciones = list(pyautogui.locateAllOnScreen(imagen, confidence=confidence))
+            encontrados = list(pyautogui.locateAllOnScreen(imagen, confidence=confidence))
+            if encontrados:
+                posiciones.extend(encontrados)
         except Exception:
             pass
-            break
     return posiciones
 
 ###--------------------------------------------------------------------------------
@@ -115,30 +134,59 @@ if Automation_Variables.running_test >= 0 :
 
   # Reinicializamos lista
   print("Presionamos botón reinicializar.")
-  location = busca_en_pantalla([boton_reinicializar], 1, 10) 
+  location = busca_en_pantalla(boton_reinicializar, 1, 10) 
   if location != None:
     pyautogui.click(location)
+    time.sleep(1)  # Pequeña pausa entre clics
 
   print("Presionamos botón seleccionar detalle.")
-  location = busca_en_pantalla([boton_seleccionar_detalle], 1, 10) 
+  location = busca_en_pantalla(boton_seleccionar_detalle, 1, 10) 
   if location != None:
+    captura_inicial = captura_pantalla((region4))    
     pyautogui.click(location)
+    cambio_detectado = espera_cambio_pantalla(2, 10, (region4), captura_inicial)
+    time.sleep(1)  # Pequeña pausa entre clics
 
   print("Presionamos botón cancelar.")
-  location = busca_en_pantalla([boton_cancel], 1, 10) 
+  location = busca_en_pantalla(boton_cancel, 1, 10) 
   if location != None:
+    captura_inicial = captura_pantalla((region4))    
     pyautogui.click(location)
+    cambio_detectado = espera_cambio_pantalla(2, 10, (region4), captura_inicial)
+    time.sleep(1)  # Pequeña pausa entre clics
 
   # Reinicializamos lista
   print("Presionamos botón reinicializar.")
-  location = busca_en_pantalla([boton_reinicializar], 1, 10) 
+  location = busca_en_pantalla(boton_reinicializar, 1, 10) 
   if location != None:
     pyautogui.click(location)
+    time.sleep(1)  # Pequeña pausa entre clics
 
   print("Presionamos botón seleccionar detalle.")
-  location = busca_en_pantalla([boton_seleccionar_detalle], 1, 10) 
-  if location != None:
-    pyautogui.click(location)
+#  location = busca_en_pantalla(boton_seleccionar_detalle, 1, 10) 
+#  if location != None:
+#    captura_inicial = captura_pantalla((region4))    
+#    pyautogui.click(location)
+#    cambio_detectado = espera_cambio_pantalla(2, 10, (region4), captura_inicial)
+
+  max_intentos = 3
+  intento = 0
+  cambio_detectado = False 
+
+  while intento < max_intentos and not cambio_detectado:
+      intento += 1
+#      print(f"Intento {intento} de {max_intentos}...")
+      location = busca_en_pantalla(boton_seleccionar_detalle, 1, 10)
+      if location:
+          captura_inicial = captura_pantalla(region4)
+          pyautogui.click(location)
+          cambio_detectado = espera_cambio_pantalla(2, 10, region4, captura_inicial)
+      if not cambio_detectado:
+          print("No se detectó cambio, intentando nuevamente...")
+          time.sleep(1)  # Pequeña pausa entre clics
+  if not cambio_detectado:
+      print("ERROR: No se detectaron cambios en pantalla después de varios intentos.")
+      sys.exit(1)  # Salimos del programa con error
 
   for i in range(15):
     print(f"Mostramos la página {i}.")
@@ -147,7 +195,7 @@ if Automation_Variables.running_test >= 0 :
     time.sleep(2)  # Pequeña pausa entre clics
   # Si es la última página me regreso 2 clicks para tomar en cuenta el último crítico
 #    if i == 6:
-#      location = busca_en_pantalla([boton_arriba_abajo], 1, 10) 
+#      location = busca_en_pantalla(boton_arriba_abajo, 1, 10) 
 #      location = (location[0], location[1] + 15)
 #      pyautogui.click(location)
 #      pyautogui.click(location)
@@ -206,7 +254,7 @@ if Automation_Variables.running_test >= 0 :
       print('automation_debug_fiori - 1 - No se encontró cambio de pantalla')
       sys.exit()
 
-  location = busca_en_pantalla([boton_ok_intro], 1, 10) 
+  location = busca_en_pantalla(boton_ok_intro, 1, 10) 
   if location != None:
     pyautogui.click(location)
     time.sleep(1)
@@ -228,7 +276,7 @@ if Automation_Variables.running_test >= 0 :
       time.sleep(1)  # Espera 1 segundo entre cada pulsación    
 
     
-#  location = busca_en_pantalla([boton_leer_auditoria], 1, 5) 
+#  location = busca_en_pantalla(boton_leer_auditoria, 1, 5) 
 #  if location != None:
 #    pyautogui.click(location)
 
@@ -237,16 +285,16 @@ if Automation_Variables.running_test >= 0 :
   print("Buscamos si no tuvo resultados...")
 
   while True:
-    locationnr = busca_en_pantalla([ventana_noresultados], 2, 1)
+    locationnr = busca_en_pantalla(ventana_noresultados, 2, 1)
     # Buscamos el cambio de pantalla con el botón de auditoría
-    locationau = busca_en_pantalla([boton_auditoria2], 5, 1) 
+    locationau = busca_en_pantalla(boton_auditoria, 5, 1) 
     if (locationnr == None) and (locationau == None):
   # si todavía no aparece ninguna otra pantalla vamos por la siguiente ejecución    
       time.sleep(5)
       continue
     elif (locationnr != None):
   # si se encontró el botón de que no hubo datos presiona el botón intro y termina
-      location = busca_en_pantalla([boton_ok_intro], 1, 5) 
+      location = busca_en_pantalla(boton_ok_intro, 1, 5) 
       break
     elif (locationau != None):
   # si ya encontró el botón de auditoría continua con la ejecución del proceso
@@ -303,12 +351,12 @@ if Automation_Variables.running_test >= 0:
 
   # Reinicializamos lista
   print("Presionamos botón reinicializar.")
-  location = busca_en_pantalla([boton_reinicializar], 1, 10) 
+  location = busca_en_pantalla(boton_reinicializar, 1, 10) 
   if location != None:
     pyautogui.click(location)
 
   print("Presionamos botón seleccionar detalle.")
-  location = busca_en_pantalla([boton_seleccionar_detalle], 1, 10) 
+  location = busca_en_pantalla(boton_seleccionar_detalle, 1, 10) 
   if location != None:
     pyautogui.click(location)
 
@@ -353,7 +401,7 @@ if Automation_Variables.running_test >= 0:
       print('automation_debug_fiori - 2 - No se encontró cambio de pantalla')
       sys.exit()
 
-  location = busca_en_pantalla([boton_ok_intro], 1, 10) 
+  location = busca_en_pantalla(boton_ok_intro, 1, 10) 
   if location != None:
     pyautogui.click(location)
     time.sleep(1)
@@ -364,7 +412,7 @@ if Automation_Variables.running_test >= 0:
   # Presionamos leer auditoria
   print("Presionamos botón leer auditoria...")
   pyautogui.press('F8')       # Presiona F8
-#  location = busca_en_pantalla([boton_leer_auditoria], 1, 5) 
+#  location = busca_en_pantalla(boton_leer_auditoria, 1, 5) 
 #  if location != None:
 #    pyautogui.click(location)
 
@@ -373,9 +421,9 @@ if Automation_Variables.running_test >= 0:
   print("Buscamos si no tuvo resultados...")
 
   while True:
-    locationnr = busca_en_pantalla([ventana_noresultados], 2, 1)
+    locationnr = busca_en_pantalla(ventana_noresultados, 2, 1)
     # Buscamos el cambio de pantalla con el botón de auditoría
-    locationau = busca_en_pantalla([boton_auditoria2], 5, 1) 
+    locationau = busca_en_pantalla(boton_auditoria, 5, 1) 
     if (locationnr == None) and (locationau == None):
   # si todavía no aparece ninguna otra pantalla vamos por la siguiente ejecución    
       time.sleep(5)
@@ -389,7 +437,7 @@ if Automation_Variables.running_test >= 0:
       screenshot.save(os.path.join(ruta_output, f"{prefijo}_{fecha_amd}_{contador}.png"))    
       contador += 1
   # si se encontró el botón de que no hubo datos presiona el botón intro y termina
-      location = busca_en_pantalla([boton_ok_intro], 1, 5) 
+      location = busca_en_pantalla(boton_ok_intro, 1, 5) 
       pyautogui.click(location)
       break
     elif (locationau != None):

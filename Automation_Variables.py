@@ -2,6 +2,7 @@ import os
 import json
 from pathlib import Path
 import getpass
+import glob
 
 # Obtener el directorio donde se ejecuta el programa
 #ruta = os.getcwd()
@@ -15,28 +16,6 @@ ruta_output = os.path.join(ruta, "output")
 ruta_directorio = Path(ruta_output)
 ruta_directorio.mkdir(parents=True, exist_ok=True)
 
-log_debug = os.path.join(ruta_imagenes, "log_debug.png")
-boton_auditoria1 =  os.path.join(ruta_imagenes, "debug_boton_auditoria1.png")
-boton_auditoria2  = os.path.join(ruta_imagenes, "debug_boton_auditoria2.png")
-boton_flecha_atras  = os.path.join(ruta_imagenes, "boton_flecha_atras.png")
-boton_ok_intro  = os.path.join(ruta_imagenes, "boton_ok_intro.png")
-boton_cancel  = os.path.join(ruta_imagenes, "boton_cancel.png")
-grabar_lista_fichero  = os.path.join(ruta_imagenes, "grabar_lista_fichero.png")
-texto_con_tabuladores  = os.path.join(ruta_imagenes, "texto_con_tabuladores.png")
-grabar_fichero  = os.path.join(ruta_imagenes, "grabar_fichero.png")
-boton_reemplazar  = os.path.join(ruta_imagenes, "boton_reemplazar.png")
-boton_permitir  = os.path.join(ruta_imagenes, "boton_permitir.png")
-boton_reinicializar  = os.path.join(ruta_imagenes, "boton_reinicializar.png")
-boton_seleccion_multiple  = os.path.join(ruta_imagenes, "boton_seleccion_multiple.png")
-boton_arriba_abajo  = os.path.join(ruta_imagenes, "boton_arriba_abajo.png")
-boton_seleccionar_detalle  = os.path.join(ruta_imagenes, "boton_seleccionar_detalle.png")
-boton_leer_auditoria  = os.path.join(ruta_imagenes, "boton_leer_auditoria.png")
-texto_critico = os.path.join(ruta_imagenes, "texto_critico.png")
-texto_grave = os.path.join(ruta_imagenes, "texto_grave.png")
-texto_nocritico_BU4 = os.path.join(ruta_imagenes, "texto_nocritico_BU4.png")
-texto_nocritico_AU5 = os.path.join(ruta_imagenes, "texto_nocritico_AU5.png")
-texto_nocritico_AUK = os.path.join(ruta_imagenes, "texto_nocritico_AUK.png")
-ventana_noresultados = os.path.join(ruta_imagenes, "ventana_noresultados.png")
 configuracion = {}
 region1 = (0.05, 0.15, 0.40, 0.40) 
 region2 = (0.30, 0.30, 0.50, 0.50) 
@@ -45,6 +24,17 @@ region4 = (0.18, 0.43, 0.57, 0.72)
 
 running_test = 1 # 1 = si, 0 = no
 file_output = 'Nombre'
+
+###--------------------------------------------------------------------------------
+def obtener_imagenes_por_clave(clave):
+    """
+    Busca todas las imágenes que empiecen con la clave en la carpeta de imágenes.
+    Por ejemplo: 'log_debug' buscará 'log_debug1.png', 'log_debug2.png', etc.
+    """
+    patron = os.path.join(ruta_imagenes, f"{clave}*.png")
+    archivos = glob.glob(patron)
+    archivos.sort()  # Opcional: ordena por nombre
+    return archivos
 
 ###--------------------------------------------------------------------------------
 def obtener_ruta_config_usuario():
@@ -158,3 +148,49 @@ def borrar_archivos_carpeta(carpeta):
         print(f"La carpeta {carpeta} no existe o no es un directorio.")
 
 ###########################
+
+#log_debug = os.path.join(ruta_imagenes, "log_debug.png")
+#boton_auditoria1 =  os.path.join(ruta_imagenes, "debug_boton_auditoria1.png")
+#boton_auditoria2  = os.path.join(ruta_imagenes, "debug_boton_auditoria2.png")
+#boton_flecha_atras  = os.path.join(ruta_imagenes, "boton_flecha_atras.png")
+#boton_ok_intro  = os.path.join(ruta_imagenes, "boton_ok_intro.png")
+#boton_cancel  = os.path.join(ruta_imagenes, "boton_cancel.png")
+#grabar_lista_fichero  = os.path.join(ruta_imagenes, "grabar_lista_fichero.png")
+#texto_con_tabuladores  = os.path.join(ruta_imagenes, "texto_con_tabuladores.png")
+#grabar_fichero  = os.path.join(ruta_imagenes, "grabar_fichero.png")
+#boton_reemplazar  = os.path.join(ruta_imagenes, "boton_reemplazar.png")
+#boton_permitir  = os.path.join(ruta_imagenes, "boton_permitir.png")
+#boton_reinicializar  = os.path.join(ruta_imagenes, "boton_reinicializar.png")
+#boton_seleccion_multiple  = os.path.join(ruta_imagenes, "boton_seleccion_multiple.png")
+#boton_arriba_abajo  = os.path.join(ruta_imagenes, "boton_arriba_abajo.png")
+#boton_seleccionar_detalle  = os.path.join(ruta_imagenes, "boton_seleccionar_detalle.png")
+#boton_leer_auditoria  = os.path.join(ruta_imagenes, "boton_leer_auditoria.png")
+#texto_critico = os.path.join(ruta_imagenes, "texto_critico.png")
+#texto_grave = os.path.join(ruta_imagenes, "texto_grave.png")
+#texto_nocritico_BU4 = os.path.join(ruta_imagenes, "texto_nocritico_BU4.png")
+#texto_nocritico_AU5 = os.path.join(ruta_imagenes, "texto_nocritico_AU5.png")
+#texto_nocritico_AUK = os.path.join(ruta_imagenes, "texto_nocritico_AUK.png")
+#ventana_noresultados = os.path.join(ruta_imagenes, "ventana_noresultados.png")
+
+# Ya tienes la función definida, así que solo hacemos las listas clave:
+log_debug = obtener_imagenes_por_clave('log_debug')
+boton_auditoria = obtener_imagenes_por_clave("debug_boton_auditoria")
+boton_flecha_atras = obtener_imagenes_por_clave("boton_flecha_atras")
+boton_ok_intro = obtener_imagenes_por_clave("boton_ok_intro")
+boton_cancel = obtener_imagenes_por_clave("boton_cancel")
+grabar_lista_fichero = obtener_imagenes_por_clave("grabar_lista_fichero")
+texto_con_tabuladores = obtener_imagenes_por_clave("texto_con_tabuladores")
+grabar_fichero = obtener_imagenes_por_clave("grabar_fichero")
+boton_reemplazar = obtener_imagenes_por_clave("boton_reemplazar")
+boton_permitir = obtener_imagenes_por_clave("boton_permitir")
+boton_reinicializar = obtener_imagenes_por_clave("boton_reinicializar")
+boton_seleccion_multiple = obtener_imagenes_por_clave("boton_seleccion_multiple")
+boton_arriba_abajo = obtener_imagenes_por_clave("boton_arriba_abajo")
+boton_seleccionar_detalle = obtener_imagenes_por_clave("boton_seleccionar_detalle")
+boton_leer_auditoria = obtener_imagenes_por_clave("boton_leer_auditoria")
+texto_critico = obtener_imagenes_por_clave("texto_critico")
+texto_grave = obtener_imagenes_por_clave("texto_grave")
+texto_nocritico_BU4 = obtener_imagenes_por_clave("texto_nocritico_BU4")
+texto_nocritico_AU5 = obtener_imagenes_por_clave("texto_nocritico_AU5")
+texto_nocritico_AUK = obtener_imagenes_por_clave("texto_nocritico_AUK")
+ventana_noresultados = obtener_imagenes_por_clave("ventana_noresultados")
