@@ -9,12 +9,12 @@ from datetime import datetime, timedelta
 from pywinauto import Application
 from Fiori_Reporte import get_reporte
 from Automation_Variables import ruta, ruta_output, boton_flecha_atras, boton_ok_intro, grabar_lista_fichero, texto_con_tabuladores, grabar_fichero, boton_reemplazar, boton_permitir 
-from Automation_Variables import boton_cancel, boton_auditoria, boton_reinicializar, log_debug, boton_seleccion_multiple, boton_arriba_abajo, boton_seleccionar_detalle
+from Automation_Variables import boton_okcancel, boton_cancel, boton_auditoria, boton_reinicializar, log_debug, boton_seleccion_multiple, boton_arriba_abajo, boton_seleccionar_detalle
 from Automation_Variables import boton_leer_auditoria, texto_grave, texto_nocritico_AU5, texto_nocritico_AUK, texto_nocritico_BU4, texto_critico, texto_con_tabuladores, ventana_noresultados
 from Automation_Genera_Docto import Genera_Documento
 from Automation_Variables import borrar_archivos_carpeta_con_prefijo, limpiar_pantalla
 from Automation_Variables import configuracion, carga_config, region4, region1
-from Automation_Functions import convert_to_excel_fiori, abrir_correo_outlook, espera_cambio_pantalla, captura_pantalla, busca_en_pantalla
+from Automation_Functions import convert_to_excel_fiori, abrir_correo_outlook, espera_cambio_pantalla, captura_pantalla, busca_en_pantalla, buscar_centro_en_pantalla
 from Automation_SAP import start_sap_logon, login_to_sap, close_window, close_sap_logon
 import Automation_Variables
 
@@ -148,7 +148,9 @@ if Automation_Variables.running_test >= 0 :
     time.sleep(1)  # Pequeña pausa entre clics
 
   print("Presionamos botón cancelar.")
-  location = busca_en_pantalla(boton_cancel, 1, 10) 
+#  location = busca_en_pantalla(boton_okcancel, 1, 10) 
+  location = buscar_centro_en_pantalla(boton_okcancel) 
+  location = (location[0] + 15, location[1])
   if location != None:
     captura_inicial = captura_pantalla((region4))    
     pyautogui.click(location)
