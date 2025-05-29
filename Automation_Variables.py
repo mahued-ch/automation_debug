@@ -3,6 +3,8 @@ import json
 from pathlib import Path
 import getpass
 import glob
+import pyautogui
+import time
 
 # Obtener el directorio donde se ejecuta el programa
 #ruta = os.getcwd()

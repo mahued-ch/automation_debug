@@ -14,9 +14,17 @@ from Automation_Variables import boton_leer_auditoria, texto_grave, texto_nocrit
 from Automation_Genera_Docto import Genera_Documento
 from Automation_Variables import borrar_archivos_carpeta_con_prefijo, limpiar_pantalla
 from Automation_Variables import configuracion, carga_config, region4, region1
-from Automation_Functions import convert_to_excel_fiori, abrir_correo_outlook, espera_cambio_pantalla, captura_pantalla, busca_en_pantalla, buscar_centro_en_pantalla
+from Automation_Functions import convert_to_excel_fiori, abrir_correo_outlook, espera_cambio_pantalla, captura_pantalla, busca_en_pantalla, buscar_centro_en_pantalla 
 from Automation_SAP import start_sap_logon, login_to_sap, close_window, close_sap_logon
 import Automation_Variables
+
+# Tu resolución base (la que usaste para definir los offsets)
+resolucion_base_x = 1920
+resolucion_base_y = 1080
+
+# Offsets medidos en tu resolución base
+offset_x_base = 50
+offset_y_base = 30
 
 # ###--------------------------------------------------------------------------------
 # def busca_en_pantalla(imagen, intervalo, reintentos, confidence=0.8): 
@@ -67,15 +75,39 @@ def buscar_todas_ocurrencias(lista_imagenes, confidence=0.8):
     return posiciones
 
 ###--------------------------------------------------------------------------------
+# Función para obtener el factor de escalado actual
+def obtener_factores_escala():
+    resolucion_actual = pyautogui.size()
+    factor_x = resolucion_actual[0] / resolucion_base_x
+    factor_y = resolucion_actual[1] / resolucion_base_y
+    return factor_x, factor_y
+
+###--------------------------------------------------------------------------------
+# Función para hacer clic en posiciones encontradas con offset relativo
 def hazclick_en_evento(tipo_evento):
-  for lc_posicion in tipo_evento:
-      # Calcular la posición de la casilla de selección
-      x_seleccion = lc_posicion.left + offset_x
-      y_seleccion = lc_posicion.top + offset_y
+    factor_x, factor_y = obtener_factores_escala()
+    offset_x_escalado = offset_x_base * factor_x
+    offset_y_escalado = offset_y_base * factor_y
+
+    for lc_posicion in tipo_evento:
+        x_seleccion = lc_posicion.left + offset_x_escalado
+        y_seleccion = lc_posicion.top + offset_y_escalado
+        pyautogui.click(x_seleccion, y_seleccion)
+        time.sleep(1)  # Pausa entre clics
+
+    return True
+
+
+###--------------------------------------------------------------------------------
+#def hazclick_en_evento(tipo_evento):
+#  for lc_posicion in tipo_evento:
+#      # Calcular la posición de la casilla de selección
+#      x_seleccion = lc_posicion.left + offset_x
+#      y_seleccion = lc_posicion.top + offset_y
     # Hacer clic en la casilla
-      pyautogui.click(x_seleccion, y_seleccion)
-      time.sleep(1)  # Pequeña pausa entre clics
-  return True
+#      pyautogui.click(x_seleccion, y_seleccion)
+#      time.sleep(1)  # Pequeña pausa entre clics
+#  return True
 
 ###--------------------------------------------------------------------------------
 
@@ -165,12 +197,6 @@ if Automation_Variables.running_test >= 0 :
     time.sleep(1)  # Pequeña pausa entre clics
 
   print("Presionamos botón seleccionar detalle.")
-#  location = busca_en_pantalla(boton_seleccionar_detalle, 1, 10) 
-#  if location != None:
-#    captura_inicial = captura_pantalla((region4))    
-#    pyautogui.click(location)
-#    cambio_detectado = espera_cambio_pantalla(2, 10, (region4), captura_inicial)
-
   max_intentos = 3
   intento = 0
   cambio_detectado = False 
@@ -190,28 +216,47 @@ if Automation_Variables.running_test >= 0 :
       print("ERROR: No se detectaron cambios en pantalla después de varios intentos.")
       sys.exit(1)  # Salimos del programa con error
 
+  resolucion_actual = pyautogui.size()
+  if resolucion_actual[0] == 1920:
+    paginas = 6
+    paginaBU4 = 0
+    paginaAU5 = 10
+    paginaAUK = 12
+  if resolucion_actual[0] == 1600:
+    paginas = 7
+    paginaBU4 = 0
+    paginaAU5 = 11
+    paginaAUK = 14
+  
   for i in range(15):
     print(f"Mostramos la página {i}.")
 
     hubo_click = False
     time.sleep(2)  # Pequeña pausa entre clics
-  # Si es la última página me regreso 2 clicks para tomar en cuenta el último crítico
-#    if i == 6:
-#      location = busca_en_pantalla(boton_arriba_abajo, 1, 10) 
-#      location = (location[0], location[1] + 15)
-#      pyautogui.click(location)
-#      pyautogui.click(location)
-#      time.sleep(2)  # Pequeña pausa entre clics
 
     eventos_criticos = None
-    if i <= 6:
+    if i <= paginas:
       eventos_criticos = buscar_todas_ocurrencias(texto_critico, confidence=0.9)
 
-    if i == 6 and eventos_criticos:
+    if i == paginas and eventos_criticos:
       eventos_criticos = [eventos_criticos[0]]  # Solo conservar la primera
+
+  # buscamos eventos no críticos antes de hacer click en alguno
+    eventos_nocriticos = None
+    if i == paginaBU4: # Se encuentra en la primera página
+      print("Buscamos BU4")
+      eventos_nocriticos = buscar_todas_ocurrencias(texto_nocritico_BU4, confidence=0.90)
+    elif i == paginaAU5:  
+      print("Buscamos AU5")
+      eventos_nocriticos = buscar_todas_ocurrencias(texto_nocritico_AU5, confidence=0.90)
+    elif i == paginaAUK: 
+      print("Buscamos AUK")
+      eventos_nocriticos = buscar_todas_ocurrencias(texto_nocritico_AUK, confidence=0.90)
     
-    offset_x = 118  # Ajusta la distancia al botón "Selección" (en X)
-    offset_y = 7    # Ajusta si el botón está más arriba o abajo
+#    offset_x = 118  # Ajusta la distancia al botón "Selección" (en X)
+#    offset_y = 7    # Ajusta si el botón está más arriba o abajo
+    offset_x_base = 118
+    offset_y_base = 7
 
     if eventos_criticos:
         print(f"Se encontraron {len(eventos_criticos)} eventos críticos.")
@@ -220,18 +265,6 @@ if Automation_Variables.running_test >= 0 :
         
     else:
         print("No se encontraron eventos críticos.")
-
-  # buscamos eventos no críticos 
-    eventos_nocriticos = None
-    if i == 0: # Se encuentra en la primera página
-      print("Buscamos BU4")
-      eventos_nocriticos = buscar_todas_ocurrencias(texto_nocritico_BU4, confidence=0.90)
-    elif i == 10:  
-      print("Buscamos AU5")
-      eventos_nocriticos = buscar_todas_ocurrencias(texto_nocritico_AU5, confidence=0.90)
-    elif i == 12: 
-      print("Buscamos AUK")
-      eventos_nocriticos = buscar_todas_ocurrencias(texto_nocritico_AUK, confidence=0.90)
 
     if eventos_nocriticos:
         print(f"Se encontraron {len(eventos_nocriticos)} eventos nocríticos.")
@@ -356,13 +389,40 @@ if Automation_Variables.running_test >= 0:
   location = busca_en_pantalla(boton_reinicializar, 1, 10) 
   if location != None:
     pyautogui.click(location)
+    time.sleep(1)  # Pequeña pausa entre clics
+
+#  print("Presionamos botón seleccionar detalle.")
+#  location = busca_en_pantalla(boton_seleccionar_detalle, 1, 10) 
+#  if location != None:
+#    pyautogui.click(location)
 
   print("Presionamos botón seleccionar detalle.")
-  location = busca_en_pantalla(boton_seleccionar_detalle, 1, 10) 
-  if location != None:
-    pyautogui.click(location)
+  max_intentos = 3
+  intento = 0
+  cambio_detectado = False 
+
+  while intento < max_intentos and not cambio_detectado:
+      intento += 1
+#      print(f"Intento {intento} de {max_intentos}...")
+      location = busca_en_pantalla(boton_seleccionar_detalle, 1, 10)
+      if location:
+          captura_inicial = captura_pantalla(region4)
+          pyautogui.click(location)
+          cambio_detectado = espera_cambio_pantalla(2, 10, region4, captura_inicial)
+      if not cambio_detectado:
+          print("No se detectó cambio, intentando nuevamente...")
+          time.sleep(1)  # Pequeña pausa entre clics
+  if not cambio_detectado:
+      print("ERROR: No se detectaron cambios en pantalla después de varios intentos.")
+      sys.exit(1)  # Salimos del programa con error
 
   Automation_Variables.file_output = 'seleccion_graves'
+
+  if resolucion_actual[0] == 1920:
+    paginas = 6
+  if resolucion_actual[0] == 1600:
+    paginas = 7
+
 
   for i in range(7):
     print(f"Mostramos la página {i}.")
@@ -374,12 +434,14 @@ if Automation_Variables.running_test >= 0:
     eventos_graves = None
     eventos_graves = buscar_todas_ocurrencias(texto_grave, confidence=0.9)
 
-    if i == 6 and eventos_graves:
+    if i == paginas and eventos_graves:
       eventos_graves = [eventos_graves[0]]  # Solo conservar la primera
 
-    offset_x = 118  # Ajusta la distancia al botón "Selección" (en X)
-    offset_y = 7    # Ajusta si el botón está más arriba o abajo
-
+#    offset_x = 118  # Ajusta la distancia al botón "Selección" (en X)
+#    offset_y = 7    # Ajusta si el botón está más arriba o abajo
+    offset_x_base = 118
+    offset_y_base = 7
+ 
     if eventos_graves:
         print(f"Se encontraron {len(eventos_graves)} eventos graves.")
 
@@ -412,11 +474,20 @@ if Automation_Variables.running_test >= 0:
     contador += 1
 
   # Presionamos leer auditoria
+#  print("Presionamos botón leer auditoria...")
+#  pyautogui.press('F8')       # Presiona F8
+
+  # Presionamos leer auditoria
+  # hacemos el intento de ejecutar el botón durante 5 segundos seguidos, para que no se pierda
+  # o si la pantalla cambia antes de terminar esos 5 segundos se sale
   print("Presionamos botón leer auditoria...")
-  pyautogui.press('F8')       # Presiona F8
-#  location = busca_en_pantalla(boton_leer_auditoria, 1, 5) 
-#  if location != None:
-#    pyautogui.click(location)
+  captura_inicial = captura_pantalla((region1))    
+  for _ in range(5):
+      pyautogui.press('F8')       # Presiona F8
+      cambio_detectado = espera_cambio_pantalla(1, 1, (region1), captura_inicial)
+      if cambio_detectado == True:
+        break
+      time.sleep(1)  # Espera 1 segundo entre cada pulsación    
 
   # Buscamos si no tuvo resultados
   time.sleep(5)
