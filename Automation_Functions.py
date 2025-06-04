@@ -553,3 +553,13 @@ def copiar_imagen_al_clipboard(imagen):
     win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
     win32clipboard.CloseClipboard()
     print("✅ Imagen copiada al portapapeles. Puedes pegarla en Paint.")        
+    
+###--------------------------------------------------------------------------------
+def escape_keyboard_input(text):
+    # Escapa % primero
+    text = text.replace('%', '%%')
+    # Luego escapamos los otros caracteres que keyboard interpreta como comandos
+    special_chars = {'{': '{{', '}': '}}', '+': '{+}', '^': '{^}', '~': '{~}'}
+    for char, replacement in special_chars.items():
+        text = text.replace(char, replacement)
+    return text    

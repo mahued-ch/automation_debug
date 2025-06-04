@@ -3,12 +3,12 @@ import sys
 import time
 import psutil
 import subprocess
+import pyautogui
 from pywinauto import Application
-from Automation_Functions import limpiar_pantalla, espera_cambio_pantalla, captura_pantalla, copiar_imagen_al_clipboard
-from Automation_Variables import configuracion, carga_config, region1, region2
+from Automation_Functions import limpiar_pantalla, espera_cambio_pantalla, captura_pantalla, copiar_imagen_al_clipboard, escape_keyboard_input, busca_en_pantalla
+from Automation_Variables import configuracion, carga_config, region1, region2, clave_acceso_nueva, sap_easy_access
 from pywinauto.keyboard import send_keys
 import Automation_Variables
-
 
 # Ruta de SAP Logon, ajusta si es diferente
 #SAP_LOGON_PATH = config["sap"]["gui_path"] #r"C:\Program Files (x86)\SAP\FrontEnd\SAPgui\saplogon.exe"
@@ -69,12 +69,20 @@ def login_to_sap(sistema, usuario, password):
     if not cambio_detectado:
       print('login_to_sap - 1 - No se encontró ventana de SAP')
       sys.exit()
+
+    print("Esperamos por pantalla de login de SAP")
+    location = busca_en_pantalla(clave_acceso_nueva, 1, 10, 0.7) 
+    if location == None:
+      print('login_to_sap - 1.5 - No se encontró ventana de SAP')
+      sys.exit()
     
     # Ingresar usuario y contraseña
 #    time.sleep(2)
     send_keys(usuario, pause=0.1)
     send_keys("{TAB}", pause=0.1)  # Simula la tecla TAB    
-    send_keys(password, pause=0.1)    
+#    safe_password = escape_keyboard_input(password)
+    pyautogui.write(password, interval=0.1)
+#    send_keys(safe_password, pause=0.1)    
     Automation_Variables.file_output = 'despues_usuario'
     captura_inicial = captura_pantalla((region1))    
     send_keys("{ENTER}", pause=0.1)  # Simula la tecla ENTER    
@@ -83,8 +91,18 @@ def login_to_sap(sistema, usuario, password):
       print('login_to_sap - 2 - No se encontró ventana de SAP')
       sys.exit()
 #    time.sleep(5)
+
+# aqui tenemos que esperar a que se abra bien la pantalla    
+    print("Esperamos por pantalla principal de SAP")
+    location = busca_en_pantalla(sap_easy_access, 1, 10, 0.7) 
+    if location == None:
+      print('login_to_sap - 2.5 - No se encontró ventana de SAP')
+      sys.exit()
+#    
+
     send_keys("% {SPACE} x")  # Simula ALT + ESPACIO + X
     time.sleep(1)
+    
     send_keys("sm20n", pause=0.1)    
     Automation_Variables.file_output = 'sm20n'
     captura_inicial = captura_pantalla((region1))    
